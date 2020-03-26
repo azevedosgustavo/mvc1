@@ -1,0 +1,20 @@
+#Estagio 1 -  base
+FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
+RUN mkdir /app
+WORKDIR /app
+EXPOSE 80/tcp
+
+#Estagio 2 - publish
+FROM microsoft/dotnet:2.1-sdk AS publish
+RUN mkdir /app
+WORKDIR /app
+COPY mvc1.csproj .
+RUN dotnet restore
+COPY . .
+RUN dotnet publish -c Release -o dist
+
+#Estagio 3 - base run
+FROM base AS final
+WORKDIR /dist
+COPY --from=publish /app/dist .
+CMD ["dotnet", "mvc1.dll"]
